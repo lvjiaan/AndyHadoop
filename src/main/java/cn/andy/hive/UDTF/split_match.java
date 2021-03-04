@@ -1,4 +1,4 @@
-package cn.andy.hive;
+package cn.andy.hive.UDTF;
 import org.apache.hadoop.hive.ql.exec.UDFArgumentException;
 import org.apache.hadoop.hive.ql.exec.UDFArgumentLengthException;
 import org.apache.hadoop.hive.ql.metadata.HiveException;
@@ -11,6 +11,8 @@ import org.apache.hadoop.hive.serde2.objectinspector.primitive.PrimitiveObjectIn
 import java.util.ArrayList;
 import java.util.List;
 
+import static java.lang.Math.min;
+
 /**
  * @Describe:
  * @Author：lvja
@@ -18,14 +20,14 @@ import java.util.List;
  * @Modifier：
  * @ModefiedDate:
  */
-public class split_rank extends GenericUDTF {
+public class split_match extends GenericUDTF {
 
 
     @Override
     public StructObjectInspector initialize(ObjectInspector[] args)
             throws UDFArgumentException {
-        if (args.length != 2) {
-            throw new UDFArgumentLengthException("请传两个参数 1、处理的字符串 2、分隔符");
+        if (args.length != 3) {
+            throw new UDFArgumentLengthException("请传三个参数 1、处理的字符串1 2、处理的字符串2 3、分隔符");
         }
 //        if (args[0].getCategory() != ObjectInspector.Category.PRIMITIVE) {
 //            throw new UDFArgumentException("ExplodeMap takes string as a parameter");
@@ -43,14 +45,17 @@ public class split_rank extends GenericUDTF {
 
     @Override
     public void process(Object[] args) throws HiveException {
-        String input = args[0].toString();
-        String regex=args[1].toString();
-        String[] list = input.split(regex);
-        for(int i=0; i<list.length; i++) {
+        String input1 = args[0].toString();
+        String input2 = args[1].toString();
+        String regex=args[2].toString();
+        String[] list1 = input1.split(regex);
+        String[] list2 = input2.split(regex);
+        int size =min(list1.length,list2.length);
+        for(int i=0; i<size; i++) {
             try {
                 List<String> relist =new ArrayList<String>();
-                relist.add(String.valueOf(i+1));
-                relist.add(list[i]);
+                relist.add(list1[i]);
+                relist.add(list2[i]);
                 forward(relist);
             } catch (Exception e) {
                 continue;
